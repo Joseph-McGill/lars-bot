@@ -1,0 +1,15 @@
+{
+  "name": "lars-bot",
+  "version": "0.1.0",
+  "description": "A Discord bot written in Python 3.10 using [discord.py](https://github.com/Rapptz/discord.py) that mimics an online friend of mine (Lars) using various voice clips and typing mannerisms. Since Lars is a close friend of mine this project will not include the actual audio files to protect his privacy. I've included an `example.mp3` in the sounds folder as a reference for adding more sound clips.",
+  "main": "index.js",
+  "scripts": {
+    "devStart": "nodemon index.js"
+  },
+  "keywords": [],
+  "author": "Joseph McGill",
+  "license": "MIT",
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
