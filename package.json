@@ -10,6 +10,11 @@
   "author": "Joseph McGill",
   "license": "MIT",
   "devDependencies": {
-    "nodemon": "^3.0.1"
-  }
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.29.1",
+    "nodemon": "^3.0.1",
+    "prettier": "3.1.1"
+  },
+  "pretter": {}
 }
