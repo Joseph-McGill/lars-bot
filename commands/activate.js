@@ -12,7 +12,9 @@ function selectRandomGreetingSoundClip() {
   const __dirname = dirname(fileURLToPath(import.meta.url));
 
   const soundsPath = path.join(__dirname, "../sounds/greetings");
-  const soundFiles = fs.readdirSync(soundsPath);
+  const soundFiles = fs
+    .readdirSync(soundsPath)
+    .filter((file) => file !== "example.mp3");
   const randomIndex = Math.floor(Math.random() * soundFiles.length);
 
   return path.join(soundsPath, soundFiles[randomIndex]);
