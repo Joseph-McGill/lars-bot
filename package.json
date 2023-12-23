@@ -5,7 +5,8 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "devStart": "nodemon --env-file=.env index.js"
+    "devStart": "nodemon --env-file=.env index.js",
+    "deployCommands": "node --env-file=.env utils/deployCommands.js"
   },
   "keywords": [],
   "author": "Joseph McGill",
