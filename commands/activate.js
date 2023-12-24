@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from "discord.js";
+import { Collection, SlashCommandBuilder } from "discord.js";
 import fs from "fs";
 import path, { dirname } from "path";
 import { fileURLToPath } from "url";
@@ -7,28 +7,70 @@ import {
   createAudioPlayer,
   createAudioResource,
 } from "@discordjs/voice";
+import { bot } from "../index.js";
+import { wait, randomTimeInterval } from "../utils/time.js";
 
-function selectRandomGreetingSoundClip() {
+const audioFileCache = new Collection();
+const greetingFileCache = new Collection();
+
+function loadSoundClips() {
   const __dirname = dirname(fileURLToPath(import.meta.url));
 
-  const soundsPath = path.join(__dirname, "../sounds/greetings");
+  const soundsPath = path.join(__dirname, "../sounds");
   const soundFiles = fs
-    .readdirSync(soundsPath)
-    .filter((file) => file !== "example.mp3");
-  const randomIndex = Math.floor(Math.random() * soundFiles.length);
+    .readdirSync(soundsPath, { recursive: true })
+    .filter((file) => !file.match(/.*example\.mp3$/) && file.match(/.*\.mp3$/)); // TODO filtering on mp3 is not great because other file types exist
 
-  return path.join(soundsPath, soundFiles[randomIndex]);
+  // TODO if no files found, should probably play the example sounds
+  for (const soundFile of soundFiles) {
+    const fullPath = path.join(soundsPath, soundFile);
+    audioFileCache.set(soundFile, fullPath);
+    if (soundFile.match(/^greetings\/.*$/)) {
+      greetingFileCache.set(soundFile, fullPath);
+    }
+  }
 }
 
-const wait = (n) => new Promise((resolve) => setTimeout(resolve, n));
+function selectRandomGreeting() {
+  const randomKey = greetingFileCache.randomKey();
+  const file = greetingFileCache.get(randomKey);
+  audioFileCache.delete(randomKey);
+  greetingFileCache.clear();
+
+  return file;
+}
+
+function selectRandomSound() {
+  const randomKey = audioFileCache.randomKey();
+  const file = audioFileCache.get(randomKey);
+  audioFileCache.delete(randomKey);
+
+  return file;
+}
+
+async function playAudioFiles(audioPlayer) {
+  loadSoundClips();
+  console.log(audioFileCache);
+
+  // Play a greeting when joining the channel
+  const greeting = createAudioResource(selectRandomGreeting());
+  audioPlayer.play(greeting);
+
+  // Play everything else in /sounds/
+  // TODO or disconnected, no one in channel
+  while (audioFileCache.size) {
+    const interval = randomTimeInterval(1, 2);
+    await wait(interval);
+    const file = createAudioResource(selectRandomSound());
+    audioPlayer.play(file);
+  }
+}
 
 export default {
   data: new SlashCommandBuilder()
     .setName("activate")
     .setDescription("Activates the LarsBot voice subroutines"),
   async execute(interaction) {
-    // console.log(interaction);
-
     const client = interaction.client;
     const userId = interaction.user.id;
 
@@ -37,7 +79,7 @@ export default {
 
     if (user && user.channelId) {
       await interaction.reply({
-        content: "LarsBot voice activated",
+        content: "LarsBot activated",
         ephemeral: true,
       });
 
@@ -48,22 +90,15 @@ export default {
         adapterCreator: channel.guild.voiceAdapterCreator,
       });
 
-      // TODO wait a random amount of time for realism
-      await wait(3000);
-
-      const clip = selectRandomGreetingSoundClip();
-      console.log(clip);
       const audioPlayer = createAudioPlayer();
-      const file = createAudioResource(clip);
       connection.subscribe(audioPlayer);
-      audioPlayer.play(file);
+      bot.setActiveConnection(connection);
 
-      // TODO stay in the channel and play other voice lines after random amounts of time
-      setTimeout(() => {
-        connection.destroy();
-      }, 5000);
+      await playAudioFiles(audioPlayer);
+      connection.destroy();
     } else {
       await interaction.reply("what's going on?");
+      // TODO register message replies if no one is in a voice channel?
     }
   },
 };

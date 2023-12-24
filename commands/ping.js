@@ -5,6 +5,9 @@ export default {
     .setName("ping")
     .setDescription("See if LarsBot is online"),
   async execute(interaction) {
-    await interaction.reply("hey man what's going on");
+    await interaction.reply({
+      content: "LarsBot is online",
+      ephemeral: true,
+    });
   },
 };

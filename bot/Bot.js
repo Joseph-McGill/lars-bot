@@ -5,6 +5,7 @@ import Discord, { Collection, GatewayIntentBits } from "discord.js";
 
 export class Bot {
   client;
+  activeConnection;
 
   constructor() {
     this.client = new Discord.Client({
@@ -52,5 +53,9 @@ export class Bot {
         ? this.client.once(event.name, (...args) => event.execute(...args))
         : this.client.on(event.name, (...args) => event.execute(...args));
     }
+  }
+
+  setActiveConnection(connection) {
+    this.activeConnection = connection;
   }
 }
