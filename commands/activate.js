@@ -11,7 +11,6 @@ import { bot } from "../bot/Bot.js";
 import { wait, randomTimeInterval } from "../utils/time.js";
 
 const audioFileCache = new Collection();
-const greetingFileCache = new Collection();
 
 function loadSoundClips() {
   const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -19,25 +18,12 @@ function loadSoundClips() {
   const soundsPath = path.join(__dirname, "../sounds");
   const soundFiles = fs
     .readdirSync(soundsPath, { recursive: true })
-    .filter((file) => !file.match(/.*example\.mp3$/) && file.match(/.*\.mp3$/)); // TODO filtering on mp3 is not great because other file types exist
+    .filter((file) => !file.match(/.*example\.mp3$/));
 
-  // TODO if no files found, should probably play the example sounds
   for (const soundFile of soundFiles) {
     const fullPath = path.join(soundsPath, soundFile);
     audioFileCache.set(soundFile, fullPath);
-    if (soundFile.match(/^greetings\/.*$/)) {
-      greetingFileCache.set(soundFile, fullPath);
-    }
   }
-}
-
-function selectRandomGreeting() {
-  const randomKey = greetingFileCache.randomKey();
-  const file = greetingFileCache.get(randomKey);
-  audioFileCache.delete(randomKey);
-  greetingFileCache.clear();
-
-  return file;
 }
 
 function selectRandomSound() {
@@ -52,13 +38,9 @@ async function playAudioFiles(audioPlayer) {
   loadSoundClips();
   console.log(audioFileCache);
 
-  // Play a greeting when joining the channel
-  const greeting = createAudioResource(selectRandomGreeting());
-  audioPlayer.play(greeting);
-
-  // Play everything else in /sounds/
-  // TODO or disconnected, no one in channel
-  while (audioFileCache.size) {
+  // Play everything in /sounds/ once
+  while (audioFileCache.size && bot.activeConnection) {
+    console.log(audioFileCache);
     const interval = randomTimeInterval(1, 2);
     await wait(interval);
     const file = createAudioResource(selectRandomSound());
@@ -78,7 +60,16 @@ export default {
     const user = guild.voiceStates.cache.get(userId);
     if (!user || !user.channelId) {
       await interaction.reply({
-        content: "You must be in a voice channel to activate LarsBot Voice",
+        content: "You must be in a voice channel to activate LarsBot",
+        ephemeral: true,
+      });
+      return;
+    }
+
+    loadSoundClips();
+    if (!audioFileCache.size) {
+      await interaction.reply({
+        content: "There are no sounds available",
         ephemeral: true,
       });
       return;
@@ -101,6 +92,10 @@ export default {
     bot.setActiveConnection(connection);
 
     await playAudioFiles(audioPlayer);
-    connection.destroy();
+
+    // Leave voice channel when done
+    if (bot.activeConnection) {
+      connection.destroy();
+    }
   },
 };
