@@ -35,13 +35,9 @@ function selectRandomSound() {
 }
 
 async function playAudioFiles(audioPlayer) {
-  loadSoundClips();
-  console.log(audioFileCache);
-
   // Play everything in /sounds/ once
   while (audioFileCache.size && bot.activeConnection) {
-    console.log(audioFileCache);
-    const interval = randomTimeInterval(1, 2);
+    const interval = randomTimeInterval(10, 20);
     await wait(interval);
     const file = createAudioResource(selectRandomSound());
     audioPlayer.play(file);
