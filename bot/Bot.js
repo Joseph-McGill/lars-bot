@@ -3,7 +3,7 @@ import path, { dirname } from "path";
 import { fileURLToPath } from "url";
 import Discord, { Collection, GatewayIntentBits } from "discord.js";
 
-export class Bot {
+class Bot {
   client;
   activeConnection;
 
@@ -16,8 +16,6 @@ export class Bot {
         GatewayIntentBits.GuildVoiceStates,
       ],
     });
-
-    this.client.login(process.env.DISCORD_TOKEN);
 
     this.registerEventListeners();
     this.registerSlashCommands();
@@ -55,7 +53,13 @@ export class Bot {
     }
   }
 
+  login() {
+    this.client.login(process.env.DISCORD_TOKEN);
+  }
+
   setActiveConnection(connection) {
     this.activeConnection = connection;
   }
 }
+
+export const bot = new Bot();

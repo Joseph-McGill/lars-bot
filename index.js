@@ -1,3 +1,4 @@
-import { Bot } from "./bot/Bot.js";
+import { bot } from "./bot/Bot.js";
 
-export const bot = new Bot();
+bot.login();
+export default bot;

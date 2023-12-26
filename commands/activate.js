@@ -7,7 +7,7 @@ import {
   createAudioPlayer,
   createAudioResource,
 } from "@discordjs/voice";
-import { bot } from "../index.js";
+import { bot } from "../bot/Bot.js";
 import { wait, randomTimeInterval } from "../utils/time.js";
 
 const audioFileCache = new Collection();
@@ -76,29 +76,31 @@ export default {
 
     const guild = await client.guilds.fetch(interaction.guildId);
     const user = guild.voiceStates.cache.get(userId);
-
-    if (user && user.channelId) {
+    if (!user || !user.channelId) {
       await interaction.reply({
-        content: "LarsBot activated",
+        content: "You must be in a voice channel to activate LarsBot Voice",
         ephemeral: true,
       });
-
-      const channel = await guild.channels.fetch(user.channelId);
-      const connection = joinVoiceChannel({
-        channelId: channel.id,
-        guildId: channel.guild.id,
-        adapterCreator: channel.guild.voiceAdapterCreator,
-      });
-
-      const audioPlayer = createAudioPlayer();
-      connection.subscribe(audioPlayer);
-      bot.setActiveConnection(connection);
-
-      await playAudioFiles(audioPlayer);
-      connection.destroy();
-    } else {
-      await interaction.reply("what's going on?");
-      // TODO register message replies if no one is in a voice channel?
+      return;
     }
+
+    await interaction.reply({
+      content: "LarsBot activated",
+      ephemeral: true,
+    });
+
+    const channel = await guild.channels.fetch(user.channelId);
+    const connection = joinVoiceChannel({
+      channelId: channel.id,
+      guildId: channel.guild.id,
+      adapterCreator: channel.guild.voiceAdapterCreator,
+    });
+
+    const audioPlayer = createAudioPlayer();
+    connection.subscribe(audioPlayer);
+    bot.setActiveConnection(connection);
+
+    await playAudioFiles(audioPlayer);
+    connection.destroy();
   },
 };

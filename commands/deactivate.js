@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from "discord.js";
-import { bot } from "../index.js";
+import { bot } from "../bot/Bot.js";
 
 export default {
   data: new SlashCommandBuilder()
