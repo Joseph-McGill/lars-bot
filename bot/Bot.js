@@ -9,12 +9,7 @@ class Bot {
 
   constructor() {
     this.client = new Discord.Client({
-      intents: [
-        GatewayIntentBits.Guilds,
-        GatewayIntentBits.GuildMessages,
-        GatewayIntentBits.MessageContent,
-        GatewayIntentBits.GuildVoiceStates,
-      ],
+      intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates],
     });
 
     this.registerEventListeners();
