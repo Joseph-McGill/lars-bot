@@ -18,7 +18,7 @@ function loadSoundClips() {
 
   const soundsPath = path.join(__dirname, "../sounds");
   const soundFiles = fs
-    .readdirSync(soundsPath, { recursive: true })
+    .readdirSync(soundsPath)
     .filter((file) => !file.match(/.*example\.mp3$/));
 
   for (const soundFile of soundFiles) {
