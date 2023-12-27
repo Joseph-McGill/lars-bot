@@ -4,7 +4,8 @@ import { bot } from "../bot/Bot.js";
 export default {
   data: new SlashCommandBuilder()
     .setName("deactivate")
-    .setDescription("Deactivate LarsBot reply and voice functionality"),
+    .setDescription("Deactivate LarsBot reply and voice functionality")
+    .setDMPermission(false),
   async execute(interaction) {
     bot.destroyActiveConnection(interaction.guildId);
     await interaction.reply({

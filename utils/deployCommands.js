@@ -49,7 +49,7 @@ const rest = new REST().setToken(process.env.DISCORD_TOKEN);
         { body: commands }
       );
     } else {
-      // Deploy to all guilds
+      // Deploy globally
       data = await rest.put(Routes.applicationCommands(botAppId), {
         body: commands,
       });

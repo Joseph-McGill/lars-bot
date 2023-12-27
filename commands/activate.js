@@ -48,7 +48,8 @@ async function playAudioFiles(audioPlayer) {
 export default {
   data: new SlashCommandBuilder()
     .setName("activate")
-    .setDescription("Activates the LarsBot voice subroutines"),
+    .setDescription("Activates the LarsBot voice subroutines")
+    .setDMPermission(false),
   async execute(interaction) {
     const client = interaction.client;
     const userId = interaction.user.id;
