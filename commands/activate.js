@@ -10,6 +10,7 @@ import {
 import { bot } from "../bot/Bot.js";
 import { wait, randomTimeInterval } from "../utils/time.js";
 
+let guildId = undefined;
 const audioFileCache = new Collection();
 
 function loadSoundClips() {
@@ -36,7 +37,7 @@ function selectRandomSound() {
 
 async function playAudioFiles(audioPlayer) {
   // Play everything in /sounds/ once
-  while (audioFileCache.size && bot.activeConnection) {
+  while (audioFileCache.size && bot.hasActiveConnection(guildId)) {
     const interval = randomTimeInterval(10, 20);
     await wait(interval);
     const file = createAudioResource(selectRandomSound());
@@ -52,7 +53,8 @@ export default {
     const client = interaction.client;
     const userId = interaction.user.id;
 
-    const guild = await client.guilds.fetch(interaction.guildId);
+    guildId = interaction.guildId;
+    const guild = await client.guilds.fetch(guildId);
     const user = guild.voiceStates.cache.get(userId);
     if (!user || !user.channelId) {
       await interaction.reply({
@@ -85,13 +87,11 @@ export default {
 
     const audioPlayer = createAudioPlayer();
     connection.subscribe(audioPlayer);
-    bot.setActiveConnection(connection);
+    bot.setActiveConnection(guildId, connection);
 
     await playAudioFiles(audioPlayer);
 
     // Leave voice channel when done
-    if (bot.activeConnection) {
-      connection.destroy();
-    }
+    bot.destroyActiveConnection(guildId);
   },
 };

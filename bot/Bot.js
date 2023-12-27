@@ -5,7 +5,7 @@ import Discord, { Collection, GatewayIntentBits } from "discord.js";
 
 class Bot {
   client;
-  activeConnection;
+  activeConnections = new Collection();
 
   constructor() {
     this.client = new Discord.Client({
@@ -57,8 +57,19 @@ class Bot {
     this.client.login(process.env.DISCORD_TOKEN);
   }
 
-  setActiveConnection(connection) {
-    this.activeConnection = connection;
+  setActiveConnection(guildId, connection) {
+    this.activeConnections.set(guildId, connection);
+  }
+
+  hasActiveConnection(guildId) {
+    return this.activeConnections.has(guildId);
+  }
+
+  destroyActiveConnection(guildId) {
+    if (this.hasActiveConnection(guildId)) {
+      this.activeConnections.get(guildId).destroy();
+      this.activeConnections.delete(guildId);
+    }
   }
 }
 
