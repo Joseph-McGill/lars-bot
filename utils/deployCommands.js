@@ -26,7 +26,7 @@ for (const commandFile of commandFiles) {
       commandNameMap.set(commandName, filePath);
     }
   } else {
-    console.error("bad");
+    console.error(`Commands must export 'data' and 'execute': ${filePath}`);
   }
 }
 
